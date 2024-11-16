@@ -932,24 +932,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
-name = "nrs-language-server"
-version = "0.1.0"
-dependencies = [
- "chumsky",
- "dashmap",
- "env_logger",
- "fxhash",
- "im-rc",
- "log",
- "pintc",
- "ropey",
- "serde",
- "serde_json",
- "tokio",
- "tower-lsp",
-]
-
-[[package]]
 name = "num_cpus"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1058,6 +1040,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "558dc3fbd2df4e8e823cb29a0083b11a2aed05c1cfb8556c53ebaa91c9c9d459"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "pint-language-server"
+version = "0.1.0"
+dependencies = [
+ "chumsky",
+ "dashmap",
+ "env_logger",
+ "fxhash",
+ "im-rc",
+ "log",
+ "pintc",
+ "ropey",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower-lsp",
 ]
 
 [[package]]

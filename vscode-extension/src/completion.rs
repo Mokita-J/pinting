@@ -1,19 +1,16 @@
-use std::{any::Any, collections::HashMap, fmt::Debug};
-use chumsky::primitive::Container;
+use std::collections::HashMap;
 use pintc::predicate::Contract;
 
-use crate::chumsky::{Expr, Spanned};
 pub enum ImCompleteCompletionItem {
     Variable(String),
 }
-/// return (need_to_continue_search, founded reference)
+
 pub fn completion(
     ast: &Contract,
     ident_offset: usize,
 ) -> HashMap<String, ImCompleteCompletionItem> {
     let mut map = HashMap::new();
 
-    // collect params variable
     
     ast.storage.iter().for_each(|item| {
         let (storage_vars, span) = item;
@@ -21,7 +18,7 @@ pub fn completion(
             storage_vars.iter().for_each(|var| {    
                 map.insert(
                     var.name.to_string(),
-                    ImCompleteCompletionItem::Variable(var.name.to_string()),
+                    ImCompleteCompletionItem::Variable(format!("{}{}", "storage::".to_string(), var.name.to_string())),
                 );
             });
         //};

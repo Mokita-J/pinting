@@ -16,23 +16,23 @@
   },
   "enabledApiProposals": [],
   "activationEvents": [
-    "onLanguage:nrs"
+    "onLanguage:pint"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
       {
-        "id": "nrs",
+        "id": "pint",
         "extensions": [
-          ".nrs"
+          ".pnt"
         ]
       }
     ],
     "configuration": {
       "type": "object",
-      "title": "nrs-language-server",
+      "title": "pint-language-server",
       "properties": {
-        "nrs-language-server.trace.server": {
+        "pint-language-server.trace.server": {
           "type": "string",
           "scope": "window",
           "enum": [
@@ -75,10 +75,12 @@
     "eslint": "^7.6.0",
     "glob": "^7.1.7",
     "mocha": "^8.0.1",
+    "ts-loader": "^9.5.1",
     "typescript": "5.4.5",
     "vscode-test": "^1.4.0",
     "vscode-uri": "^3.0.2",
-    "webpack": "^5.82.1"
+    "webpack": "^5.82.1",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "vscode-languageclient": "9.0.1"

@@ -9,13 +9,13 @@ use fxhash::FxBuildHasher;
 use pintc::error::Handler;
 
 use dashmap::DashMap;
-use nrs_language_server::chumsky::{
+use pint_language_server::chumsky::{
     type_inference, ImCompleteSemanticToken,
 };
-use nrs_language_server::completion::completion;
-use nrs_language_server::jump_definition::get_definition;
-use nrs_language_server::reference::get_reference;
-use nrs_language_server::semantic_token::{semantic_token_from_ast, LEGEND_TYPE};
+use pint_language_server::completion::completion;
+use pint_language_server::jump_definition::get_definition;
+use pint_language_server::reference::get_reference;
+use pint_language_server::semantic_token::{semantic_token_from_ast, LEGEND_TYPE};
 use ropey::Rope;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -45,7 +45,7 @@ impl LanguageServer for Backend {
                 )),
                 completion_provider: Some(CompletionOptions {
                     resolve_provider: Some(false),
-                    trigger_characters: Some(vec![".".to_string()]),
+                    trigger_characters: Some(vec![":".to_string()]),
                     work_done_progress_options: Default::default(),
                     all_commit_characters: None,
                     completion_item: None,
@@ -223,7 +223,7 @@ impl LanguageServer for Backend {
            let mut ret = Vec::with_capacity(completions.len());
            for (_, item) in completions {
                match item {
-                   nrs_language_server::completion::ImCompleteCompletionItem::Variable(var) => {
+                   pint_language_server::completion::ImCompleteCompletionItem::Variable(var) => {
                        ret.push(CompletionItem {
                            label: var.clone(),
                            insert_text: Some(var.clone()),
