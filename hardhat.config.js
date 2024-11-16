@@ -66,7 +66,10 @@ task("deploy", "Run Ignition node")
 
 task("test", "Run test")
   .setAction(async () => {
-    console.log("Running test...");
+    // if we are using Rust front end
+    const cmd = 'cargo test'
+    const output = execSync(cmd, { encoding: 'utf-8' });
+    console.log(output);
   });
 
 /** @type import('hardhat/config').HardhatUserConfig */
