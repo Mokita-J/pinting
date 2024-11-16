@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 const execSync = require('child_process').execSync;
+const { spawn } = require('child_process');
+
 // TODO: override tasks-> compile, node, deploy, test, init
 
 task("compile", "Compile pint smart contracts")
@@ -8,23 +10,46 @@ task("compile", "Compile pint smart contracts")
 
     const contractsDir = hre.config.paths.sources;
     try {
-        const output = execSync('pint build', { 
-          encoding: 'utf-8',
-          cwd: contractsDir
-        });
-        console.log(output);
+      const output = execSync('pint build', {
+        encoding: 'utf-8',
+        cwd: contractsDir
+      });
+      console.log(output);
     } catch (error) {
-        console.error(`Error compiling contracts from ${contractsDir}:`, error.message);
+      console.error(`Error compiling contracts from ${contractsDir}:`, error.message);
     }
   });
 
-task("node", "Run Essential node")
-  .setAction(async () => {
+task("node", "Run Essential node, you can specify the Node API and Builder API bind addresses")
+  // TODO:Start a new terminal
+  .addOptionalParam("nodeApiBindAddress", "Node API bind address", "0.0.0.0:3553")
+  .addOptionalParam("builderApiBindAddress", "Builder API bind address", "0.0.0.0:3554")
+  .setAction(async (taskArgs) => {
     console.log("Running Essential node...");
-    //TODO: print the output
-    const cmd = 'essential-builder --node-api-bind-address "0.0.0.0:3553" --builder-api-bind-address "0.0.0.0:3554"';
-    const output = execSync(cmd, { encoding: 'utf-8' });
-    console.log(output);
+
+    const builder_tool_cmd = 'essential-builder'
+    const arg_node_api = `--node-api-bind-address=${taskArgs.nodeApiBindAddress}`
+    const arg_builder_api = `--builder-api-bind-address=${taskArgs.builderApiBindAddress}`
+
+    const new_process = spawn(builder_tool_cmd, [arg_node_api, arg_builder_api],
+      { stdio: 'inherit' })
+
+    new_process.on('error', (err) => {
+      console.error('Failed to start process:', err);
+      process.exit(1);
+    });
+
+    new_process.on('exit', (code) => {
+      if (code !== 0) {
+        console.error(`Process exited with code ${code}`);
+        process.exit(code);
+      }
+    });
+
+    // console.log(output);
+
+    await new Promise(() => { });
+
 
   });
 
