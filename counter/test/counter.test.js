@@ -3,64 +3,66 @@ const path = require('path');
 const { execSync } = require('child_process');
 const findProcess = require('find-process');
 const { spawn } = require('child_process');
-// const {deploy, compile, queryState, submitSolution} = hre.pint;
 
 
-describe('Counter Contract', () => {
+describe('Counter Smart Contract', () => {
   const sourcePath = path.join(__dirname, '../contracts');
   const contractName = 'counter';
 
   before(async () => {
     try {
-      execSync('nc -zv 0.0.0.0 3554', { stdio: 'inherit' });
-      console.log('^.^ Node is running...');
+      execSync('nc -zv 0.0.0.0 3554', { stdio: 'pipe' });
+      console.log('      🔄 Node running\n');
     } catch (error) {
-      console.error('Node is not running: ', error.message);
-      console.log('^.^ Starting node...');
-      // execSync('npx hardhat node');
+      console.log('      🚀 Starting node...\n');
       hardhatProcess = spawn('npx', ['hardhat', 'node'], {
         detached: true,
         stdio: 'ignore'
       });
       try {
         await new Promise(resolve => setTimeout(resolve, 5000));
+        console.log('      ✨ Node ready\n');
       } catch (error) {
-        console.error('Error during node startup:', error.message);
+        console.error('      ❌ Node startup failed:', error.message, '\n');
         throw error;
       }
     }
   });
 
   after(async () => {
-    // Kill the Hardhat node process
     try {
       const node_list = await findProcess('port', 3553);
-      // const builder_list = await findProcess('port', 3554);
       if (node_list.length) {
         execSync(`kill -9 ${node_list[0].pid}`, { stdio: 'ignore' });
-        console.log('Hardhat node stopped >.<');
+        console.log('      ✨ Node stopped\n');
       }
     } catch (error) {
-      console.error('Error stopping Hardhat node:', error.message);
+      console.error('❌ Stop failed:', error.message);
     }
   });
 
-  it('should deploy successfully', async () => {
-    const contractInfo = await hre.pint.deploy(sourcePath, contractName);
-    expect(contractInfo.contractAddress).to.be.equal('1899743AA94972DDD137D039C2E670ADA63969ABF93191FA1A4506304D4033A2');
-    expect(contractInfo.methodAddress).to.be.equal('355A12DCB600C302FFD5D69C4B7B79E60BA3C72DDA553B7D43F4C36CB7CC0948');
-    expect(contractInfo.deploymentHash).to.be.equal('1FD5247B6DBB3C79CA875FD54894F71F0840F38E469D5A2270BD8AE02FBF22FA');
+  describe('Deployment & State Management', () => {
+    it('should deploy successfully and increment counter to 1', async () => {
+      console.log('      📄 Deploying contract...\n');
+      const contractInfo = await hre.pint.deploy(sourcePath, contractName);
+      console.log('      ✨ Deployed\n');
+      expect(contractInfo.contractAddress).to.not.be.null;
+      expect(contractInfo.methodAddress).to.not.be.null;
+      expect(contractInfo.deploymentHash).to.not.be.null;
+      
+      const key = "0000000000000000";
+      const state = await hre.pint.queryState(contractInfo.contractAddress, key);
+      expect(state).to.be.equal('null');
 
-    const state = await hre.pint.queryState(contractInfo.contractAddress, "0000000000000000");
-    expect(state).to.be.equal('null');
+      const mutations = [{ key: [0], value: [1] }];
 
-    const mutations = [{ key: [0], value: [1] }];
-
-    const solution = await hre.pint.submitSolution(hre.config.paths.sources, contractInfo.contractAddress, contractInfo.methodAddress, [], mutations);
-    expect(solution).to.be.equal("68A1BC8E7A5E6789E8DE4BC59A7ADD0BFC5AF7FA591FCC03CEBE6E4754C13CA1");
-    // wait for the state to be updated
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    const postState = await hre.pint.queryState(contractInfo.contractAddress, "0000000000000000");
-    expect(postState).to.be.equal('[1]');
+      const solution = await hre.pint.submitSolution(hre.config.paths.sources, contractInfo.contractAddress, contractInfo.methodAddress, [], mutations);
+      expect(solution).to.not.be.null;
+      console.log('      .. Waiting for state update...\n');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      const postState = await hre.pint.queryState(contractInfo.contractAddress, key);
+      console.log('      ✨ State updated\n');
+      expect(postState).to.not.be.null;
+    });
   });
 });

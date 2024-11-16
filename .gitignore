@@ -1,6 +1,9 @@
 node_modules
+out
+solution.json
 .env
 .DS_Store
+dist
 
 # Hardhat files
 /cache

@@ -6,6 +6,6 @@
   },
   "dependencies": {
     "find-process": "^1.4.7",
-    "hardhat-pint": "^0.0.2"
+    "hardhat-pint": "^0.0.3"
   }
 }
