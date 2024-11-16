@@ -5,8 +5,6 @@ import { HardhatConfig, HardhatUserConfig } from "hardhat/types";
 import { Pint } from "./Pint";
 import "./type-extensions";
 
-// This import is needed to let the TypeScript compiler know that it should include your type
-// extensions in your npm package's types file.
 
 extendConfig(
   (config: HardhatConfig, userConfig: Readonly<HardhatUserConfig>) => {}
@@ -14,7 +12,6 @@ extendConfig(
 
 // Override the built-in compile task
 task("compile", "Compiles Pint smart contracts").setAction(async (_, hre) => {
-  console.log("Compiling Pint contracts...");
   try {
     const result = await hre.pint.compile(hre.config.paths.sources);
     if (!result.contractAddress || !result.methodAddress) {
@@ -24,7 +21,7 @@ task("compile", "Compiles Pint smart contracts").setAction(async (_, hre) => {
     console.log("Method Address:", result.methodAddress);
     return result;
   } catch (error) {
-    // console.error("Compilation failed:", error);
+    console.error("Compilation failed:", error);
     throw error;
   }
 });
