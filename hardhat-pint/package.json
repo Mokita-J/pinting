@@ -1,6 +1,6 @@
 {
   "name": "hardhat-pint",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Hardhat plugin for Pint",
   "repository": "https://github.com/Mokita-J/pinting",
   "license": "MIT",
