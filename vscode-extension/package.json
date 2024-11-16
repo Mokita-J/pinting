@@ -1,7 +1,7 @@
 {
   "name": "pint-language-server",
   "description": "pint language server",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "publisher": "ASSERT-KTH",
   "license": "MIT",
   "engines": {
@@ -55,8 +55,8 @@
   },
   "scripts": {
     "postinstall": "cd client && pnpm i",
-    "esbuild-base": "esbuild",
-    "vscode:prepublish": "npm run esbuild-base ./client/src/extension.js --minify",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./client/src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
     "test-compile": "tsc -p ./",
     "compile": "cross-env NODE_ENV=production tsc -b",
     "watch": "rm -rf dist && tsc -b -w",
@@ -64,8 +64,8 @@
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
     "build": "webpack --config webpack.config.js",
-    "package": "vsce package --no-dependencies",
-    "publish": "vsce publish --no-dependencies"
+    "package": "pnpm vsce package --no-dependencies",
+    "publish": "pnpm vsce publish --no-dependencies"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
