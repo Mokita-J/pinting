@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use fxhash::FxBuildHasher;
 
 use dashmap::DashMap;
 use nrs_language_server::chumsky::{
-    parse, type_inference, Func, ImCompleteSemanticToken, ParserResult,
+    type_inference, Func, ImCompleteSemanticToken,
 };
 use nrs_language_server::completion::completion;
 use nrs_language_server::jump_definition::get_definition;
@@ -24,6 +26,7 @@ struct Backend {
     ast_map: DashMap<String, HashMap<String, Func>>,
     document_map: DashMap<String, Rope>,
     semantic_token_map: DashMap<String, Vec<ImCompleteSemanticToken>>,
+
 }
 
 #[tower_lsp::async_trait]
@@ -107,11 +110,13 @@ impl LanguageServer for Backend {
             uri: params.text_document.uri,
             text: params.text_document.text,
             version: params.text_document.version,
-        })
-        .await
+        }).await
+
+        
     }
 
     async fn did_change(&self, mut params: DidChangeTextDocumentParams) {
+        
         self.on_change(TextDocumentItem {
             uri: params.text_document.uri,
             text: std::mem::take(&mut params.content_changes[0].text),
@@ -478,45 +483,66 @@ struct TextDocumentItem {
     version: i32,
 }
 
+struct NonSend {
+    name: String
+}
+
+impl NonSend {
+    fn new() -> Self{
+        NonSend {
+            name: "name".to_string()
+        }
+    }
+
+    fn parse(&self, params: &TextDocumentItem) -> Vec<Diagnostic> {
+
+        let rope = ropey::Rope::from_str(&params.text);
+        let handler = pintc::error::Handler::default();
+        //let path = Path::new("/home/javier/test.go");
+        let path: PathBuf = params.uri.path().to_string().into();
+
+        let empty_map: HashMap<&str, &Path, FxBuildHasher> = HashMap::with_hasher(FxBuildHasher::default());
+
+        let _ = pintc::parser::parse_project(&handler, &empty_map, &path);
+        
+
+        let (parse_errors, _parse_warnings) = handler.consume();
+
+
+        let diagnostics = parse_errors
+            .into_iter()
+            .filter_map(|item| {
+                let trait_object: &dyn pintc::error::ReportableError = &item;
+                let (message, span) = (trait_object.display_raw(), trait_object.span());
+
+            || -> Option<Diagnostic> {
+                    let start_position = offset_to_position(span.start(), &rope)?;
+                    let end_position = offset_to_position(span.end(), &rope)?;
+                    Some(Diagnostic::new_simple(
+                        Range::new(start_position, end_position),
+                        message,
+                    ))
+                }()
+            })
+            .collect::<Vec<_>>();
+
+        diagnostics
+    }
+}
+
+
 impl Backend {
     async fn on_change(&self, params: TextDocumentItem) {
         let rope = ropey::Rope::from_str(&params.text);
         self.document_map
             .insert(params.uri.to_string(), rope.clone());
-        //let ParserResult {
-        //   ast,
-        //    parse_errors,
-        //    semantic_tokens,
-        //} = parse(&params.text);
 
-        let handler = pintc::error::Handler::default();
-        let empty_map: HashMap<&str, &Path, FxBuildHasher> = HashMap::with_hasher(FxBuildHasher::default());
-        //let path = Path::new("/home/javier/test.go");
-        let path_str = params.uri.to_string();
-        let path: PathBuf = path_str.into();
+        let non_send_var = Arc::new(Mutex::new(NonSend::new()));
+        //let non_send_var = Arc::clone(&non_send_var);
 
+        let data = non_send_var.lock().await;
 
-        let _ = pintc::parser::parse_project(&handler, &empty_map, &path);
-        println!("{}", handler.has_errors());
-        let (parse_errors, parse_warnings) = handler.consume();
-        println!("{:#?}", parse_errors);
-
-
-        let diagnostics = parse_errors
-            .into_iter()
-            .map(|item| -> Diagnostic { //todo: matchc by trait?
-                let trait_object: &dyn pintc::error::ReportableError = &item;
-                //let labels = trait_object.labels()[0];
-
-                let pos_start = offset_to_position(trait_object.span().start(), &rope).unwrap();
-                let pos_end = offset_to_position(trait_object.span().end(), &rope).unwrap();
-                Diagnostic::new_simple(
-                    Range::new(pos_start, pos_end),
-                    trait_object.note().unwrap_or("missing error info".to_string())
-                )
-            })
-            .collect::<Vec<_>>();
-
+        let diagnostics = data.parse(&params);
 
         self.client
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))
@@ -533,7 +559,7 @@ impl Backend {
     }
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() {
     env_logger::init();
 
