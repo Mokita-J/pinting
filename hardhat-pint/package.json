@@ -2,7 +2,7 @@
   "name": "hardhat-pint",
   "version": "0.0.1",
   "description": "Hardhat plugin for Pint",
-  "repository": "",
+  "repository": "git:https://github.com/Mokita-J/pinting",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
