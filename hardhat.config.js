@@ -21,7 +21,6 @@ task("compile", "Compile pint smart contracts")
   });
 
 task("node", "Run Essential node, you can specify the Node API and Builder API bind addresses")
-  // TODO:Start a new terminal
   .addOptionalParam("nodeApiBindAddress", "Node API bind address", "0.0.0.0:3553")
   .addOptionalParam("builderApiBindAddress", "Builder API bind address", "0.0.0.0:3554")
   .setAction(async (taskArgs) => {
@@ -46,7 +45,6 @@ task("node", "Run Essential node, you can specify the Node API and Builder API b
       }
     });
 
-    // console.log(output);
 
     await new Promise(() => { });
 
