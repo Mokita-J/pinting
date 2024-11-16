@@ -1,75 +1,120 @@
 # Hardhat Pint
 
-A Hardhat plugin for Pint - the declarative programming language for smart contracts on Essential Blockchain.
+A Hardhat plugin that integrates Pint (a declarative smart contract language) with your Essential Blockchain development workflow. Write, compile, and deploy Pint contracts using familiar Hardhat commands.
 
-This plugin integrates Pint into your Hardhat development workflow, allowing you to abstract yourself from the each SDK tools of Essential and use the Hardhat CLI.
+## Prerequisites
+
+Before using this plugin, ensure you have the following installed:
+
+### Rust Tools
+- [Pint](https://github.com/essential-contributions/pint) - The Pint CLI
+  ```bash
+  cargo install pint-cli
+  ```
+- [Essential Rest Client](https://github.com/essential-contributions/essential-integration/tree/main/crates/essential-rest-client) - Essential's REST client
+  ```bash
+  cargo install essential-rest-client
+  ```
+
+### Node.js Tools
+- [Node.js](https://nodejs.org/) (v14 or later)
+- [Hardhat](https://hardhat.org/) - Ethereum development environment
+  ```bash
+  npm install --save-dev hardhat
+  ```
 
 ## Features
 
-- Easy-to-use testing interface
-- Integration with Hardhat tasks(compile, deploy, test, clean, node)
-- Support for both local and remote nodes
-
+- 🔧 Seamless integration with Hardhat CLI
+- 🧪 Simple testing interface with Mocha
+- 📦 Support for both local and remote nodes
+- 🛠️ Essential tasks: compile, deploy, test, clean, node
 
 ## Installation
 
-1. Start a new project with Hardhat:
 ```bash
+# Create a new Hardhat project (if needed)
 npx hardhat init
-```
 
-2. Install the plugin:
-```bash
+# Install the plugin
 npm install hardhat-pint
 ```
 
-## Usage
-### JavaScript
-Add the plugin to your `hardhat.config.js`:
+## Configuration
+
+Add the plugin to your Hardhat config file:
 
 ```javascript
+// hardhat.config.js
 require("hardhat-pint");
 ```
-### TypeScript
-Add the plugin to your `hardhat.config.ts`:
 
 ```typescript
+// hardhat.config.ts
 import "hardhat-pint";
 ```
 
+## Available Commands
 
-### Example usage
 ```bash
-npx hardhat compile Compiles Pint smart contracts
+# Compile your Pint contracts
+npx hardhat compile
 
-npx hardhat node   Run Essential node, you can specify the Node API and Builder API bind addresses
+# Start a local Essential node
+npx hardhat node
 
-npx hardhat deploy --contract <contract-name> [--url <node-url>] Deploy compiled Pint contracts to the specified node(default: http://localhost:3554)
+# Deploy a contract
+npx hardhat deploy --contract <contract-name> [--url <node-url>]
 
-npx hardhat test    Runs mocha tests
+# Run tests
+npx hardhat test
 
-npx hardhat clean   Removes the Pint compiled contracts directory
+# Clean compiled contracts
+npx hardhat clean
 ```
 
-### Testing Interface
-For plugin developers or contributors, we provide testing helpers to simplify the testing process. It can be used to write mocha tests for your contracts.
+## Testing Guide
 
-Example:
+The plugin provides testing helpers for writing Mocha tests. Here's a basic example:
+
 ```javascript
-  const { deploy, queryState, submitSolution } = require("hardhat-pint");
+const { deploy, queryState, submitSolution } = require("hardhat-pint");
 
-  it('Test Pint contract: counter', async () => {
-    const contractHash, IncrementHash = await deploy(sourcePath, contractName);
-    expect(contractHash).to.be.equal(...);
-    expect(IncrementHash).to.be.equal(...);
-    const state = await queryState(contractHash, key);
-    expect(state).to.be.equal(...);
-   ...
-    const solution = await submitSolution(hre.config.paths.sources, contractHash, IncrementHash, [], mutations);
-    expect(solution).to.be.equal(...);
-    const postState = await queryState(contractHash, key);
-    expect(postState).to.be.equal(...);
+describe("Counter Contract", () => {
+  it("should increment counter value", async () => {
+    // Deploy the contract
+    const [contractHash, IncrementHash] = await deploy(sourcePath, contractName);
+    
+    // Query initial state
+    const initialState = await queryState(contractHash, key);
+    
+    // Submit a solution
+    const solution = await submitSolution(
+      hre.config.paths.sources,
+      contractHash,
+      IncrementHash,
+      [],
+      mutations
+    );
+    
+    // Verify the new state
+    const newState = await queryState(contractHash, key);
+    expect(newState).to.not.equal(initialState);
   });
+});
 ```
+
+## Default Configuration
+
+- Local node URL: `http://localhost:3554`
+- Supported networks: Local and remote Essential nodes
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
