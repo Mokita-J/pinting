@@ -62,7 +62,7 @@ describe('Counter Smart Contract', () => {
       await new Promise(resolve => setTimeout(resolve, 5000));
       const postState = await hre.pint.queryState(contractInfo.contractAddress, key);
       console.log('      ✨ State updated\n');
-      expect(postState).to.not.be.null;
+      expect(postState).to.be.equal('[1]');
     });
   });
 });
