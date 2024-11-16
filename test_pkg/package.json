@@ -2,10 +2,10 @@
   "name": "hardhat-project",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "find-process": "^1.4.7",
     "hardhat": "^2.22.15"
   },
   "dependencies": {
-    "find-process": "^1.4.7",
     "hardhat-pint": "file:../hardhat-pint"
   }
 }
