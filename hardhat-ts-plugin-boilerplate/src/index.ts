@@ -60,7 +60,7 @@ task("compile", "Compiles Pint smart contracts")
     }
   });
 
-  task("deploy", "Deploy compiled Pint contracts")
+task("deploy", "Deploy compiled Pint contracts")
   .addParam("contract", "Name of the contract to deploy")
   .addOptionalParam("url", "Network URL", "http://127.0.0.1:3554")
   .setAction(async (taskArgs, hre) => {
@@ -78,14 +78,34 @@ task("compile", "Compiles Pint smart contracts")
     }
   });
 
-  task("clean", "Removes the Pint compiled contracts directory")
+task("clean", "Removes the Pint compiled contracts directory")
   .setAction(async function (_, { config }) {
     const pint = new Pint();
     const sourcePath = config.paths.sources;
     await pint.clean(sourcePath);
   });
 
-  
+task("node", "Run Essential node, you can specify the Node API and Builder API bind addresses")
+  .addOptionalParam("nodeApiBindAddress", "Node API bind address", "0.0.0.0:3553")
+  .addOptionalParam("builderApiBindAddress", "Builder API bind address", "0.0.0.0:3554")
+  .setAction(async (taskArgs, hre) => {
+    try {
+      const process = await hre.pint.startNode(
+        taskArgs.nodeApiBindAddress,
+        taskArgs.builderApiBindAddress
+      );
+
+      // Keep the process running
+      await new Promise((resolve) => {
+        process.on('close', resolve);
+      });
+    } catch (error) {
+      console.error('Error starting node:', error);
+      process.exit(1);
+    }
+  });
+
+
 
 extendEnvironment((hre) => {
   // We add a field to the Hardhat Runtime Environment here.
