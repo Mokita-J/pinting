@@ -1,21 +1,26 @@
 require("@nomicfoundation/hardhat-toolbox");
 const execSync = require('child_process').execSync;
+
 // TODO: override tasks-> compile, node, deploy, test, init
+
+const compilePintContracts = async (hre) => {
+  console.log("Compiling pint smart contracts...");
+  try {
+    const output = execSync('pint build', { 
+      encoding: 'utf-8',
+      cwd: hre.config.paths.sources
+    });
+    console.log(output);
+    return true;
+  } catch (error) {
+    console.error(`Error compiling contracts:`, error.message);
+    return false;
+  }
+};
 
 task("compile", "Compile pint smart contracts")
   .setAction(async (taskArgs, hre) => {
-    console.log("Compiling pint smart contracts...");
-
-    const contractsDir = hre.config.paths.sources;
-    try {
-        const output = execSync('pint build', { 
-          encoding: 'utf-8',
-          cwd: contractsDir
-        });
-        console.log(output);
-    } catch (error) {
-        console.error(`Error compiling contracts from ${contractsDir}:`, error.message);
-    }
+    await compilePintContracts(hre);
   });
 
 task("node", "Run Essential node")
@@ -28,15 +33,37 @@ task("node", "Run Essential node")
 
   });
 
-task("deploy", "Run Ignition node")
-  .setAction(async () => {
-    console.log("Deploy contract...");
-    // TODO: transfer this to ignition after some research about it
-    // TODO: generalize for a contract
-    const contract_path = '/home/hackathon/pint-project/counter/contract/out/debug/counter.json';
-    const cmd = 'essential-rest-client deploy-contract "http://127.0.0.1:3554" ' + contract_path;
-    const output = execSync(cmd, { encoding: 'utf-8' });
-    console.log(output);
+task("deploy", "Deploy compiled contracts")
+  .addParam("contract", "Name of the contract to deploy")
+  .setAction(async (taskArgs, hre) => {
+    console.log(`Deploying contract: ${taskArgs.contract}...`);
+    
+    const contractsDir = `${hre.config.paths.sources}/out/debug`;
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      const contractFile = `${taskArgs.contract}.json`;
+      const contractPath = path.join(contractsDir, contractFile);
+      
+      if (!fs.existsSync(contractPath)) {
+        console.log(`Contract file not found. Attempting to compile first...`);
+        const success = await compilePintContracts(hre);
+        if (!success || !fs.existsSync(contractPath)) {
+          throw new Error(`Contract file ${contractFile} not found in ${contractsDir} even after compilation`);
+        }
+      }
+
+      const url = hre.network.config.url ? hre.network.config.url : "http://127.0.0.1:3554";
+      console.log(`Using network: ${url}`);
+      
+      const cmd = `essential-rest-client deploy-contract "${url}" "${contractPath}"`;
+      const output = execSync(cmd, { encoding: 'utf-8' });
+      console.log(output);
+      
+    } catch (error) {
+      console.error(`Error deploying contract ${taskArgs.contract}:`, error.message);
+    }
   });
 
 task("test", "Run test")
@@ -47,4 +74,20 @@ task("test", "Run test")
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.27",
+  networks: {
+    essential: {
+      url: "https://node.essential.builders",
+      accounts: [],
+      chainId: 5197,
+      gasPrice: "auto",
+      timeout: 20000
+    },
+    local: {
+      url: "http://127.0.0.1:3554",
+      accounts: [],
+      chainId: 5197,
+      gasPrice: "auto",
+      timeout: 20000
+    }
+  }
 };
