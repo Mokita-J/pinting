@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::{any::Any, collections::HashMap, fmt::Debug};
+use chumsky::primitive::Container;
 use pintc::predicate::Contract;
 
 use crate::chumsky::{Expr, Spanned};
@@ -24,77 +25,32 @@ pub fn completion(
                 );
             });
         //};
-            //get_completion_of(&v.body, &mut map, ident_offset);
     });
+
+    ast.preds.iter().for_each(|pred| {
+        map.insert(
+            pred.1.name.to_string(),
+            ImCompleteCompletionItem::Variable(pred.1.name.to_string().chars().skip(2).collect()), //TODO: remove dots
+        );
+        pred.1.params.iter().for_each(|param| {
+            let key_value= pred.1.name.to_string() + "::" + &param.name.to_string();
+            map.insert(
+                key_value,
+                ImCompleteCompletionItem::Variable(param.name.to_string().chars().skip(2).collect()),
+            );
+        });
+
+        pred.1.variables.variables().into_iter().for_each(|v |{
+            let var_key= pred.1.name.to_string() + "::" + &v.1.name.to_string();
+            map.insert(var_key, ImCompleteCompletionItem::Variable(
+              v.1.name.to_string().chars().skip(2).collect()));
+        });
+    });
+
+
+
+
 
     map
 }
 
-pub fn get_completion_of(
-    expr: &Spanned<Expr>,
-    definition_map: &mut HashMap<String, ImCompleteCompletionItem>,
-    ident_offset: usize,
-) -> bool {
-    match &expr.0 {
-        Expr::Error => true,
-        Expr::Value(_) => true,
-        // Expr::List(exprs) => exprs
-        //     .iter()
-        //     .for_each(|expr| get_definition(expr, definition_ass_list)),
-        Expr::Local(local) => {
-            !(ident_offset >= local.1.start && ident_offset < local.1.end)
-        }
-        Expr::Let(name, lhs, rest, _name_span) => {
-            definition_map.insert(
-                name.clone(),
-                ImCompleteCompletionItem::Variable(name.clone()),
-            );
-            match get_completion_of(lhs, definition_map, ident_offset) {
-                true => get_completion_of(rest, definition_map, ident_offset),
-                false => false,
-            }
-        }
-        Expr::Then(first, second) => match get_completion_of(first, definition_map, ident_offset) {
-            true => get_completion_of(second, definition_map, ident_offset),
-            false => false,
-        },
-        Expr::Binary(lhs, _op, rhs) => match get_completion_of(lhs, definition_map, ident_offset) {
-            true => get_completion_of(rhs, definition_map, ident_offset),
-            false => false,
-        },
-        Expr::Call(callee, args) => {
-            match get_completion_of(callee, definition_map, ident_offset) {
-                true => {}
-                false => return false,
-            }
-            for expr in &args.0 {
-                match get_completion_of(expr, definition_map, ident_offset) {
-                    true => continue,
-                    false => return false,
-                }
-            }
-            true
-        }
-        Expr::If(test, consequent, alternative) => {
-            match get_completion_of(test, definition_map, ident_offset) {
-                true => {}
-                false => return false,
-            }
-            match get_completion_of(consequent, definition_map, ident_offset) {
-                true => {}
-                false => return false,
-            }
-            get_completion_of(alternative, definition_map, ident_offset)
-        }
-        Expr::Print(expr) => get_completion_of(expr, definition_map, ident_offset),
-        Expr::List(lst) => {
-            for expr in lst {
-                match get_completion_of(expr, definition_map, ident_offset) {
-                    true => continue,
-                    false => return false,
-                }
-            }
-            true
-        }
-    }
-}

@@ -142,60 +142,9 @@ impl LanguageServer for Backend {
             .await;
     }
 
-    //async fn goto_definition(
-    //    &self,
-    //    params: GotoDefinitionParams,
-    //) -> Result<Option<GotoDefinitionResponse>> {
-       // let definition = async {
-       //     let uri = params.text_document_position_params.text_document.uri;
-       //     let ast = self.ast_map.get(uri.as_str())?;
-       //     let rope = self.document_map.get(uri.as_str())?;
+    // TODO:    //async fn goto_definition(
+    // TODO:     //async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
 
-       //     let position = params.text_document_position_params.position;
-       //     let char = rope.try_line_to_char(position.line as usize).ok()?;
-       //     let offset = char + position.character as usize;
-            // self.client.log_message(MessageType::INFO, &format!("{:#?}, {}", ast.value(), offset)).await;
-       //     let span = get_definition(&ast, offset);
-       //     self.client
-       //         .log_message(MessageType::INFO, &format!("{:?}, ", span))
-       //         .await;
-       //     span.and_then(|(_, range)| {
-       //         let start_position = offset_to_position(range.start, &rope)?;
-       //        let end_position = offset_to_position(range.end, &rope)?;
-
-       //         let range = Range::new(start_position, end_position);
-
-       //         Some(GotoDefinitionResponse::Scalar(Location::new(uri, range)))
-       //     })
-       // }
-       // .await;
-       // Ok(definition)
-    //}
-    //async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
-    //    let reference_list = || -> Option<Vec<Location>> {
-    //        let uri = params.text_document_position.text_document.uri;
-    //        let ast = self.ast_map.get(&uri.to_string())?;
-    //        let rope = self.document_map.get(&uri.to_string())?;
-
-    //       let position = params.text_document_position.position;
-    //        let char = rope.try_line_to_char(position.line as usize).ok()?;
-    //        let offset = char + position.character as usize;
-    //        let reference_list = get_reference(&ast, offset, false);
-    //       let ret = reference_list
-    //            .into_iter()
-    //            .filter_map(|(_, range)| {
-    //                let start_position = offset_to_position(range.start, &rope)?;
-    //                let end_position = offset_to_position(range.end, &rope)?;
-
-    //                let range = Range::new(start_position, end_position);
-
-    //                Some(Location::new(uri.clone(), range))
-    //            })
-    //            .collect::<Vec<_>>();
-    //        Some(ret)
-    //    }();
-    //    Ok(reference_list)
-    //}
 
    async fn semantic_tokens_full(
        &self,
@@ -268,6 +217,7 @@ impl LanguageServer for Backend {
            let char = rope.try_line_to_char(position.line as usize).ok()?;
            let offset = char + position.character as usize;
            
+
            let completions = completion(&ast, offset);
 
            let mut ret = Vec::with_capacity(completions.len());
@@ -282,27 +232,7 @@ impl LanguageServer for Backend {
                            ..Default::default()
                        });
                    }
- //                  nrs_language_server::completion::ImCompleteCompletionItem::Function(
- //                     name,
- //                     args,
- //                 ) => {
- //                     ret.push(CompletionItem {
- //                         label: name.clone(),
- //                         kind: Some(CompletionItemKind::FUNCTION),
- //                         detail: Some(name.clone()),
- //                         insert_text: Some(format!(
- //                             "{}({})",
- //                             name,
- //                             args.iter()
- //                                 .enumerate()
- //                                 .map(|(index, item)| { format!("${{{}:{}}}", index + 1, item) })
- //                                 .collect::<Vec<_>>()
- //                                 .join(",")
- //                         )),
- //                         insert_text_format: Some(InsertTextFormat::SNIPPET),
- //                         ..Default::default()
- //                     });
- //                 }
+
                }
            }
            Some(ret)
