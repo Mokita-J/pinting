@@ -2,7 +2,7 @@
   "name": "hardhat-pint",
   "version": "0.0.1",
   "description": "Hardhat plugin for Pint",
-  "repository": "git:https://github.com/Mokita-J/pinting",
+  "repository": "https://github.com/Mokita-J/pinting",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -10,7 +10,10 @@
     "ethereum",
     "smart-contracts",
     "hardhat",
-    "hardhat-plugin"
+    "hardhat-plugin",
+    "pint",
+    "essential",
+    "blockchain"
   ],
   "scripts": {
     "lint:fix": "prettier --write 'src/**/*.{js,ts}' 'test/**/*.{js,ts}' && tslint --fix --config tslint.json --project tsconfig.json",

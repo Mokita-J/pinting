@@ -6,53 +6,70 @@ This plugin integrates Pint into your Hardhat development workflow, allowing you
 
 ## Features
 
-- Configurable formatting rules
-- Integration with Hardhat tasks
-- Format on compile option
-- CI-friendly command line interface
+- Easy-to-use testing interface
+- Integration with Hardhat tasks(compile, deploy, test, clean, node)
+- Support for both local and remote nodes
+
 
 ## Installation
 
+1. Start a new project with Hardhat:
 ```bash
-npm install --save-dev hardhat-pint
+npx hardhat init
+```
+
+2. Install the plugin:
+```bash
+npm install hardhat-pint
 ```
 
 ## Usage
-
-Import the plugin in your `hardhat.config.js`:
+### JavaScript
+Add the plugin to your `hardhat.config.js`:
 
 ```javascript
 require("hardhat-pint");
 ```
-
-Or if you are using TypeScript, in your `hardhat.config.ts`:
+### TypeScript
+Add the plugin to your `hardhat.config.ts`:
 
 ```typescript
 import "hardhat-pint";
 ```
 
-## Tasks
 
-This plugin adds the following tasks to Hardhat:
-
-- `pint`: Formats all Solidity files in your project
-- `pint:check`: Checks if files are formatted without making changes
-
+### Example usage
 ```bash
-npx hardhat pint
-npx hardhat pint:check
+npx hardhat compile Compiles Pint smart contracts
+
+npx hardhat node   Run Essential node, you can specify the Node API and Builder API bind addresses
+
+npx hardhat deploy --contract <contract-name> [--url <node-url>] Deploy compiled Pint contracts to the specified node(default: http://localhost:3554)
+
+npx hardhat test    Runs mocha tests
+
+npx hardhat clean   Removes the Pint compiled contracts directory
 ```
 
-## Configuration
+### Testing Interface
+For plugin developers or contributors, we provide testing helpers to simplify the testing process. It can be used to write mocha tests for your contracts.
 
-Add a `pint` entry to your `hardhat.config.js` or `hardhat.config.ts`:
+Example:
+```javascript
+  const { deploy, queryState, submitSolution } = require("hardhat-pint");
 
-```typescript
-module.exports = {
-  pint: {
-    preset: "default",
-    formatOnCompile: true,
-    // Additional Pint configuration options...
-  }
-};
+  it('Test Pint contract: counter', async () => {
+    const contractHash, IncrementHash = await deploy(sourcePath, contractName);
+    expect(contractHash).to.be.equal(...);
+    expect(IncrementHash).to.be.equal(...);
+    const state = await queryState(contractHash, key);
+    expect(state).to.be.equal(...);
+   ...
+    const solution = await submitSolution(hre.config.paths.sources, contractHash, IncrementHash, [], mutations);
+    expect(solution).to.be.equal(...);
+    const postState = await queryState(contractHash, key);
+    expect(postState).to.be.equal(...);
+  });
 ```
+
+
