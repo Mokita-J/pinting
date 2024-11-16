@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 const execSync = require('child_process').execSync;
+const fs = require('fs');
+const path = require('path');
 
 // TODO: override tasks-> compile, node, deploy, test, init
 
@@ -40,8 +42,6 @@ task("deploy", "Deploy compiled contracts")
     
     const contractsDir = `${hre.config.paths.sources}/out/debug`;
     try {
-      const fs = require('fs');
-      const path = require('path');
       
       const contractFile = `${taskArgs.contract}.json`;
       const contractPath = path.join(contractsDir, contractFile);
@@ -63,6 +63,19 @@ task("deploy", "Deploy compiled contracts")
       
     } catch (error) {
       console.error(`Error deploying contract ${taskArgs.contract}:`, error.message);
+    }
+  });
+
+task("clean", "Clean up compiled contracts")
+  .setAction(async () => {
+    console.log("Cleaning up compiled contracts...");
+    const contractsDir = `${hre.config.paths.sources}/out`;
+    
+    if (fs.existsSync(contractsDir)) {
+      fs.rmSync(contractsDir, { recursive: true, force: true });
+      console.log("Cleanup completed successfully.");
+    } else {
+      console.log("No compiled contracts found to clean up.");
     }
   });
 
