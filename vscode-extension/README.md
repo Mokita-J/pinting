@@ -2,7 +2,7 @@
 ## Introduction
 This repo is a language server for the pint programming language.
 
-### more info about pint
+#### More about pint
 [PINT book](https://docs.essential.builders/protocol-overview/pint?q=)
 
 ## Development using VSCode
