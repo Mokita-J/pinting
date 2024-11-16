@@ -3,6 +3,8 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use std::fs::File;
+use std::io::Write;
 use fxhash::FxBuildHasher;
 
 use dashmap::DashMap;
@@ -117,6 +119,9 @@ impl LanguageServer for Backend {
 
     async fn did_change(&self, mut params: DidChangeTextDocumentParams) {
         
+        self.client
+            .log_message(MessageType::INFO, "file CHANGED!")
+            .await;
         self.on_change(TextDocumentItem {
             uri: params.text_document.uri,
             text: std::mem::take(&mut params.content_changes[0].text),
@@ -499,7 +504,14 @@ impl NonSend {
         let rope = ropey::Rope::from_str(&params.text);
         let handler = pintc::error::Handler::default();
         //let path = Path::new("/home/javier/test.go");
-        let path: PathBuf = params.uri.path().to_string().into();
+        //
+        let path = "/tmp/pint-lsp";
+        let mut file = File::create(path);
+    
+        // Write the string to the file
+        file.expect("failed ot open tmp file").write_all(params.text.as_bytes());
+
+        let path: PathBuf = path.to_string().into();
 
         let empty_map: HashMap<&str, &Path, FxBuildHasher> = HashMap::with_hasher(FxBuildHasher::default());
 
@@ -543,6 +555,8 @@ impl Backend {
         let data = non_send_var.lock().await;
 
         let diagnostics = data.parse(&params);
+        
+        self.client.log_message(MessageType::INFO, diagnostics.len());
 
         self.client
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))

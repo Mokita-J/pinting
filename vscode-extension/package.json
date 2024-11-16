@@ -1,5 +1,5 @@
 {
-  "name": "nrs-language-server",
+  "name": "pint-language-server",
   "description": "nano rust language server",
   "license": "MIT",
   "version": "1.5.0",
