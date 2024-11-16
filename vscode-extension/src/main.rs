@@ -45,7 +45,7 @@ impl LanguageServer for Backend {
                 )),
                 completion_provider: Some(CompletionOptions {
                     resolve_provider: Some(false),
-                    trigger_characters: Some(vec![":".to_string()]),
+                    trigger_characters: Some(vec!["".to_string()]),
                     work_done_progress_options: Default::default(),
                     all_commit_characters: None,
                     completion_item: None,
@@ -229,10 +229,43 @@ impl LanguageServer for Backend {
                            insert_text: Some(var.clone()),
                            kind: Some(CompletionItemKind::VARIABLE),
                            detail: Some(var),
+                           sort_text: Some("c".to_string()),
                            ..Default::default()
                        });
-                   }
+                   },
 
+                   pint_language_server::completion::ImCompleteCompletionItem::Type(var) => {
+                    ret.push(CompletionItem {
+                        label: var.clone(),
+                        insert_text: Some(var.clone()),
+                        kind: Some(CompletionItemKind::CLASS),
+                        detail: Some(var),
+                        sort_text: Some("b".to_string()),
+                        ..Default::default()
+                    });
+                },
+
+                pint_language_server::completion::ImCompleteCompletionItem::Keyword(var) => {
+                    ret.push(CompletionItem {
+                        label: var.clone(),
+                        insert_text: Some(var.clone()),
+                        kind: Some(CompletionItemKind::KEYWORD),
+                        detail: Some(var),
+                        sort_text: Some("a".to_string()),
+                        ..Default::default()
+                    });
+                }
+
+                pint_language_server::completion::ImCompleteCompletionItem::StorageVariable(var) => {
+                    ret.push(CompletionItem {
+                        label: var.clone(),
+                        insert_text: Some(var.clone()),
+                        kind: Some(CompletionItemKind::FIELD),
+                        detail: Some(var),
+                        sort_text: Some("d".to_string()),
+                        ..Default::default()
+                    });
+                }
                }
            }
            Some(ret)
