@@ -1076,9 +1076,9 @@ dependencies = [
 
 [[package]]
 name = "pintc"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab16a41547aa8ab5baa8d1e47b639469ac10a83e6411d378f249baf52e6b245e"
+checksum = "dd0ed72b8561196672e4c9cec18de35e07a2475291ee6ba8d4cba5ebd65ad4f1"
 dependencies = [
  "anyhow",
  "ariadne",

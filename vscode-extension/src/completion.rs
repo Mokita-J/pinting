@@ -1,41 +1,32 @@
 use std::collections::HashMap;
+use pintc::predicate::Contract;
 
-use crate::chumsky::{Expr, Func, Spanned};
+use crate::chumsky::{Expr, Spanned};
 pub enum ImCompleteCompletionItem {
     Variable(String),
-    Function(String, Vec<String>),
 }
 /// return (need_to_continue_search, founded reference)
 pub fn completion(
-    ast: &HashMap<String, Func>,
+    ast: &Contract,
     ident_offset: usize,
 ) -> HashMap<String, ImCompleteCompletionItem> {
     let mut map = HashMap::new();
-    for (_, v) in ast.iter() {
-        if v.name.1.end < ident_offset {
-            map.insert(
-                v.name.0.clone(),
-                ImCompleteCompletionItem::Function(
-                    v.name.0.clone(),
-                    v.args.clone().into_iter().map(|(name, _)| name).collect(),
-                ),
-            );
-        }
-    }
 
     // collect params variable
-    for (_, v) in ast.iter() {
-        if v.span.end > ident_offset && v.span.start < ident_offset {
-            // log::debug!("this is completion from body {}", name);
-            v.args.iter().for_each(|(item, _)| {
+    
+    ast.storage.iter().for_each(|item| {
+        let (storage_vars, span) = item;
+        //if span.end() > ident_offset && span.start() < ident_offset {
+            storage_vars.iter().for_each(|var| {    
                 map.insert(
-                    item.clone(),
-                    ImCompleteCompletionItem::Variable(item.clone()),
+                    var.name.to_string(),
+                    ImCompleteCompletionItem::Variable(var.name.to_string()),
                 );
             });
-            get_completion_of(&v.body, &mut map, ident_offset);
-        }
-    }
+        //};
+            //get_completion_of(&v.body, &mut map, ident_offset);
+    });
+
     map
 }
 
