@@ -101,13 +101,6 @@ task("clean", "Clean up compiled contracts")
     }
   });
 
-task("test", "Run test")
-  .setAction(async () => {
-    // if we are using Rust front end
-    const cmd = 'cargo test'
-    const output = execSync(cmd, { encoding: 'utf-8' });
-    console.log(output);
-  });
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
