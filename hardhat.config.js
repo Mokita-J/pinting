@@ -3,14 +3,19 @@ const execSync = require('child_process').execSync;
 // TODO: override tasks-> compile, node, deploy, test, init
 
 task("compile", "Compile pint smart contracts")
-  .setAction(async () => {
+  .setAction(async (taskArgs, hre) => {
     console.log("Compiling pint smart contracts...");
 
-    // TODO: generalize for all src contracts
-    const path = '/home/hackathon/pint-project/counter/contract'
-    const output = execSync('cd ' + path +' && pint build', { encoding: 'utf-8' });
-    console.log(output);
-
+    const contractsDir = hre.config.paths.sources;
+    try {
+        const output = execSync('pint build', { 
+          encoding: 'utf-8',
+          cwd: contractsDir
+        });
+        console.log(output);
+    } catch (error) {
+        console.error(`Error compiling contracts from ${contractsDir}:`, error.message);
+    }
   });
 
 task("node", "Run Essential node")
